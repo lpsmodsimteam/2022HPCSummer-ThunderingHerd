@@ -1,0 +1,8 @@
+.build
+.vscode
+*.so
+*.txt
+*.csv
+*.ods
+*.ods#
+*.csv#

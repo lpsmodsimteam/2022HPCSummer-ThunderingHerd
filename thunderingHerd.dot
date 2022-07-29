@@ -1,0 +1,62 @@
+graph "sst_simulation" {
+overlap=scale;
+splines=spline;
+node [shape=record];
+graph [style=invis];
+
+subgraph cluster_0 {
+0 [label="{<main> userOne\nthunderingHerd.websiteUser |
+<websiteCache> Port: websiteCache}"];
+
+}
+
+subgraph cluster_1 {
+1 [label="{<main> userTwo\nthunderingHerd.websiteUser |
+<websiteCache> Port: websiteCache}"];
+
+}
+
+subgraph cluster_2 {
+2 [label="{<main> userThree\nthunderingHerd.websiteUser |
+<websiteCache> Port: websiteCache}"];
+
+}
+
+subgraph cluster_3 {
+3 [label="{<main> userFour\nthunderingHerd.websiteUser |
+<websiteCache> Port: websiteCache}"];
+
+}
+
+subgraph cluster_4 {
+4 [label="{<main> userFive\nthunderingHerd.websiteUser |
+<websiteCache> Port: websiteCache}"];
+
+}
+
+subgraph cluster_5 {
+5 [label="{<main> websiteCache\nthunderingHerd.websiteCache |
+<userOne> Port: userOne |
+<userTwo> Port: userTwo |
+<userThree> Port: userThree |
+<userFour> Port: userFour |
+<userFive> Port: userFive |
+<websiteServer> Port: websiteServer}"];
+
+}
+
+subgraph cluster_6 {
+6 [label="{<main> websiteServer\nthunderingHerd.websiteServer |
+<websiteCache> Port: websiteCache}"];
+
+}
+
+
+0:"websiteCache" -- 5:"userOne"
+1:"websiteCache" -- 5:"userTwo"
+2:"websiteCache" -- 5:"userThree"
+3:"websiteCache" -- 5:"userFour"
+4:"websiteCache" -- 5:"userFive"
+6:"websiteCache" -- 5:"websiteServer"
+
+}
