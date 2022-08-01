@@ -42,6 +42,7 @@ websiteServer::~websiteServer() {
 
 bool websiteServer::clockTick( SST::Cycle_t currentCycle ) {
     // output.output(CALL_INFO, "Server Sim-Time: %ld\n", getCurrentSimTimeNano());
+    // check that there's an event in the queue to process
     if (memoryRequests.size() > 0) {
         ServerRequestEvent *serverev = memoryRequests.front();
         memoryRequests.pop();
@@ -50,7 +51,6 @@ bool websiteServer::clockTick( SST::Cycle_t currentCycle ) {
         int userID = serverev->serverreq.id;
 
         // temporarily just always return true
-        // double checking that connections work properly so far
         // future step: randomize bad requests from server
         output.output(CALL_INFO, "is now sending over to cache: %s \n", websites[pageRequested].c_str());
         struct CacheRequest cachereq = { SERVER, userID, pageRequested, websites[pageRequested], 1 };

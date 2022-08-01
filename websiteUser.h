@@ -19,7 +19,7 @@ class websiteUser : public SST::Component {
 
 public:
 	/**
-	 * @brief Construct a new dining Philosopher object
+	 * @brief Construct a new website User object
 	 * 
 	 * @param id The id for the component, this is passed in by SST. Usually 
 	 * just need to pass it to the base SST::Component constructor
@@ -28,79 +28,63 @@ public:
 	websiteUser( SST::ComponentId_t id, SST::Params& params );
 	
 	/**
-	 * @brief Destroy the dining Philosopher object
+	 * @brief Destroy the website User object
 	 * 
 	 */
 	~websiteUser();
 
 	/**
-	 * @brief This function randomizes which chopstick each philosopher grabs 
+	 * @brief This function randomizes which website each user requests 
 	 * in the beginning of the simulation in order to randomize it.
 	 * 
-	 * Our simulation defines a random seed for each philosopher, and this seed 
-	 * dictates whether or not the first request to the dining table is sent 
-	 * for the chopstick on the left, or for the one on the right
-	 * 
+	 * Our simulation defines a random seed for each user, and this seed 
+	 * dictates which site they'll choose to try to access first
 	 * @return void
 	 */
 	void setup();
 
 	/**
-	 * @brief This first clock function checks the status of the philosopher, 
-	 * and updates their needs accordingly.  It also performs livelock 
-	 * detection
+	 * @brief This first clock function defines the general behavior of a 
+	 * user trying to access a website
 	 * 
 	 * This function contains the main functionality of the entire simulation.  
-	 * It starts out by checking if we need to update our livelock window, which
-	 * checks the status of the system and notes down the current livelock 
-	 * metrics.  After this, we check the status of the philosopher, sending a 
-	 * request to the dining table for a chopstick if we're hungry, or seeing if 
-	 * we've elapsed out eating or thinking durations to switch states.
+	 * It checks what state the user is in, keeping track of the browsing length
+	 * if they have a url, or requesting a website if they're ready to switch
+	 * pages.  
 	 * 
 	 * @param currentCycle This tells us what cycle of the simulation we're on, 
-	 * where each philosopher's cycle may or may not have the same frequency.
+	 * where each user's cycle may or may not have the same frequency.
 	 * @return This returns whether or not the simulation should continue 
 	 */
 	bool clockTick( SST::Cycle_t currentCycle );
 	/**
-	 * @brief This second clock function induces livelock by emptying the 
-	 * philosophers' hands if they only hold one chopstick.
+	 * @brief This second clock function defines the behavior if the user 
+	 * hasn't recieved a response from the cache after a certain period of time
 	 * 
-	 * This function may or may not run on a different cycle from the previous 
-	 * clock in order to induce livelock.  We avoid deadlock in this simulation 
-	 * by making our philosophers "polite", and not allowing them to only hold 
-	 * one chopstick for an extended period of time.  If a philosopher is only 
-	 * holding one chopstick, we initiatie an event to send that chopstick back 
-	 * to the dining table for someone else to grab.
+	 * This function runs on a shorter frequency than the first clock function,
+	 * since it defines the "impatient" behavior of the user.  If the user 
+	 * hasn't heard back from the cache after a certain amount of time, this
+	 * function will trigger, and they'll begin to spam the cache with requests 
+	 * until they recieve the site they're looking for.
 	 * 
 	 * @param currentCycle This tells us what cycle of the simulation we're on, 
-	 * where each philosopher's cycle may or may not have the same frequency.
+	 * where each user's cycle may or may not have the same frequency.
 	 * @return This returns whether or not the simulation should continue 
 	 */
 	bool waitingTick( SST::Cycle_t currentCycle );
 
 	/** 
-	 * @brief handles messages sent to the dining philosophers 
-	 * back from dining table
+	 * @brief handles messages sent to the users back from the cache
 	 * 
 	 * This function unwraps the information that was sent back from the 
-	 * request to the dining table, and checks to see whether or not the
-	 * chopstick that was asked for is actually available.  
+	 * request to the cache, and checks to see whether or not the
+	 * website that was asked for is actually available.  
  	 *
  	 * @param ev An event object that holds the contents of the message
-	 * sent back from the dining table
+	 * sent back from the cache
  	 * @return void
  	*/
     void handleEvent(SST::Event *ev);
-
-
-	/** @brief function to output current status of simulation
-	 * 
-	 * This function places a majority of the status outputs into one function
-	 * that can be called anywhere to see where chopsticks are being held
-	 *  @return void
- 	*/
-	void outputTickInfo();
 
 	/**
 	 * \cond
@@ -111,27 +95,17 @@ public:
 		"thunderingHerd", // element library
 		"websiteUser", // component
 		SST_ELI_ELEMENT_VERSION( 1, 0, 0 ),
-		"philosopher to model the dining philosophers problem",
+		"users who browse various pages on a website",
 		COMPONENT_CATEGORY_UNCATEGORIZED
 	)
 
 	// Parameter name, description, default value
 	SST_ELI_DOCUMENT_PARAMS(
-		{ "thinkingDuration", "How long to wait between thinking and trying to eat", "15s" },
-		{ "waitingClock", "How long to wait between checking if I have both chopsticks", "13s" },
-		{ "randomseed", "Random Seed for car type generation", "151515" },
-		{ "eatingduration", "length of time to eat", "2000" },
-		{ "id", "id for dining table", "1" },
-		{ "livelockCheck", "number of cycles to wait before livelock check", "10000" },
-		{ "windowSize", "length of window for livelock detection", "100" },
+		{ "websiteBrowsingLength", "How long to wait between checking user status", "10s" },
+		{ "websiteRefreshLength", "How long to wait between impatiently waiting for a website", "2s" },
+		{ "requestTimeoutLength", "How many cycles to wait for a cache response", "5" },
+		{ "id", "id for the user", "1" },
 	)
-
-	// Statistic name, description, unit, enable level
-	SST_ELI_DOCUMENT_STATISTICS(
-        { "eatingCounterStats", "Number of times a philosopher ate", "counter", 1 },  
-        { "thinkingCounterStats", "Number of times a philosopher thought", "counter", 1 },
-        { "hungryCounterStats", "Number of times a philosopher was hungry", "counter", 1 }
-    )
 
 	// Port name, description, event type
 	SST_ELI_DOCUMENT_PORTS(
@@ -142,23 +116,23 @@ public:
 	 */
 
 private:
-	SST::Output output;				/* Standard output to the terminal */
-	SST::RNG::MarsagliaRNG* rng; 	/* Random number generator for our first website request */
-	std::string clock;				/* Clock that checks and updates the state of the philosopher every cycle */
-	std::string waitingClock;		/* Clock that checks whether or not we need to return chopsticks every cycle */
-	int64_t RandomSeed;				/* Seed pased into the MarsagliaRNG */
-	SST::Link *websiteCache;		/* Link to connect philosopher with dining table */
+	SST::Output output;						/* Standard output to the terminal */
+	SST::RNG::MarsagliaRNG* rng; 			/* Random number generator for our first website request */
+	std::string clock;						/* Clock that checks and updates the state of the philosopher every cycle */
+	std::string waitingClock;				/* Clock that checks whether or not we need to return chopsticks every cycle */
+	int64_t RandomSeed;						/* Seed pased into the MarsagliaRNG */
+	SST::Link *websiteCache;				/* Link to connect philosopher with dining table */
 
 
-	int userID;
-	std::string websiteBrowsingLength;
-	std::string websiteRefreshLength;
-	SST::Cycle_t requestTimeoutLength;
-	std::string currentWebsite;
-	std::vector<std::string> listOfPages;
-	userStatus currentStatus;
-	SST::Cycle_t startWaitingCycle;
-	int currentWebsiteRequest;
+	int userID;								/* id for cache to identify users */
+	std::string websiteBrowsingLength;		/* defines cycle length for clock */
+	std::string websiteRefreshLength;		/* defines cycle length for waitingClock */
+	SST::Cycle_t requestTimeoutLength;		/* how many cycles a user will wait for a response until becoming impatient */
+	std::string currentWebsite;				/* url of current website being browsed */
+	std::vector<std::string> listOfPages;	/* names of websites a user can request */
+	userStatus currentStatus;				/* status of the user */
+	SST::Cycle_t startWaitingCycle;			/* when a user started waiting for a cache response */
+	int currentWebsiteRequest;				/* spot in vector that holds the name of the website request */
 };
 
 #endif

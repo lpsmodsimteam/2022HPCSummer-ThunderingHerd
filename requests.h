@@ -73,11 +73,11 @@ struct cacheObject {
 };
 
 /*! 
- * This class creates a message that the dining table sends over to one of the 
- * philosophers when they request a chopstick.  The ChopstickRequest object is 
+ * This class creates a message that the cache sends over to the 
+ * user when they request a website.  The UserRequest object is 
  * created separatley, then passed into this class and serialized.  By doing so, 
  * the data is organized in such a way that after its sent over its link to 
- * the philosopher, that component knows how to read over and extract 
+ * the user, that component knows how to read over and extract 
  * information from this event.
  *
  */
@@ -95,7 +95,7 @@ public:
 	 * UserRequest struct
 	 * 
 	 * @param userreq User Request Struct that contains information 
-	 * regarding whether or not the philosopher can pick up a chopstick
+	 * regarding what website they are requesting
 	 */
 	UserRequestEvent(UserRequest userreq) :
 		Event(),
@@ -110,11 +110,11 @@ public:
 };
 
 /*! 
- * This class creates a message that the dining philosopher sends over to the 
- * table when they request a chopstick.  The PhilosopherRequest object is 
+ * This class creates a message that the users or the server can send over to the 
+ * cache when they either want to send or recieve a website.  The CacheRequest object is 
  * created separatley, then passed into this class and serialized.  By doing so, 
  * the data is organized in such a way that after its sent over its link to 
- * the table, that component knows how to read over and extract 
+ * the cache, that component knows how to read over and extract 
  * information from this event.
  *
  */
@@ -131,11 +131,11 @@ public:
 	}
 	
 	/**
-	 * @brief Construct a new Philosopher Request Event object that wraps the 
+	 * @brief Construct a new Cache Request Event object that wraps the 
 	 * PhilosopherRequest struct
 	 * 
-	 * @param cachereq Philosopher Request struct that contains information 
-	 * regarding which chopstick is being requested or sent over the link
+	 * @param cachereq Cache Request struct that contains information 
+	 * regarding url updates is being requested or sent over the link
 	 */
 	CacheRequestEvent(CacheRequest cachereq) :
 		Event(),
@@ -149,6 +149,15 @@ public:
 	ImplementSerializable(CacheRequestEvent); 
 };
 
+/*! 
+ * This class creates a message that the cache can send over to the 
+ * server when they either want to request a website.  The ServerRequest object is 
+ * created separatley, then passed into this class and serialized.  By doing so, 
+ * the data is organized in such a way that after its sent over its link to 
+ * the server, that component knows how to read over and extract 
+ * information from this event.
+ *
+ */
 class ServerRequestEvent : public SST::Event {
 
 public:
@@ -159,11 +168,11 @@ public:
 	}
 	
 	/**
-	 * @brief Construct a new Philosopher Request Event object that wraps the 
-	 * PhilosopherRequest struct
+	 * @brief Construct a new Server Request Event object that wraps the 
+	 * ServerRequest struct
 	 * 
-	 * @param serverreq Philosopher Request struct that contains information 
-	 * regarding which chopstick is being requested or sent over the link
+	 * @param serverreq Server Request struct that contains information 
+	 * regarding which website is being requested over the link
 	 */
 	ServerRequestEvent(ServerRequest serverreq) :
 		Event(),

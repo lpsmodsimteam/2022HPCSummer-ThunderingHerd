@@ -13,7 +13,6 @@ websiteCache::websiteCache( SST::ComponentId_t id, SST::Params& params ) : SST::
     // order to initalize our component
 	websiteBrowsingLength = params.find<std::string>("websiteBrowsingLength", "10ms");
     maxCacheSize = params.find<int64_t>("maxCacheSize", 6);
-    requestLengthTime = params.find<int64_t>("websiteRefreshLength", 5);
 
     /*
      * The register clock functions take in a duration of time that was defined 
@@ -53,60 +52,62 @@ websiteCache::~websiteCache() {
 
 }
 
+// TODO functions:
+// randomize error for sites to have to access server
 bool websiteCache::clockTick( SST::Cycle_t currentCycle ) {
     // output.output(CALL_INFO, "Cache Sim-Time: %ld\n", getCurrentSimTimeNano());
+    // check if there's a request in the queue to process
     if (memoryRequests.size() > 0) {
         CacheRequestEvent *cacheev = memoryRequests.front();
         memoryRequests.pop();
     
     if ( cacheev != NULL ) {
+        // unwrap CacheRequestEvent
         requester requester = cacheev->cachereq.request;
         int userID = cacheev->cachereq.id;
         std::string pageRequested = cacheev->cachereq.pageRequested;
         std::string urlRequested = cacheev->cachereq.urlRequested;
         bool successfulReturn = cacheev->cachereq.successfulReturn;
 
-        // temporarily just always return true
-        // double checking that connections work properly so far
+        // cache recieves requests from both server and users,
+        // so we need to differentiate the two
         if (requester == USER) {
-            output.output(CALL_INFO, "user request \n");
+            output.output(CALL_INFO, "recieved a user request \n");
+            // check if we have url saved in cache
             if (websitesInCache.count(pageRequested)) {
+                // access the url the user requested, and send it to them
+                // wrap the message in the UserRequestEvent
+                // update websiteAge to indicate least recently used item
                 websitesInCache[pageRequested].websiteAge = getCurrentSimTimeNano();
                 output.output(CALL_INFO, "returning page %s \n", websitesInCache[pageRequested].websiteUrl.c_str());
                 struct UserRequest userreq = { websitesInCache[pageRequested].websiteUrl, true };
                 returnUserLink(userID)->send(new UserRequestEvent(userreq));
-                // update lrutracker 
             } else {
-                // send request to server
-                // send back invalid bit to user
-                // they have to wait until server processes request
+                // send request to server for url
                 struct ServerRequest serverreq = { pageRequested, userID };
                 returnUserLink(0)->send(new ServerRequestEvent(serverreq));
             }
-            // necessary functions:
-            // randomize error for sites to have to access server
-            // check cache, if not send to server
+
+        // server is sending back a requested url, implement cache replacement
         } else if ( requester == SERVER ) {
-            // cache replacement policy
-            output.output(CALL_INFO, "server request \n");
+            output.output(CALL_INFO, "recieved a server request \n");
             if (successfulReturn) {
+                // if there's room in the cache, just insert it in the map
                 if (websitesInCache.size() < maxCacheSize) {
                     struct cacheObject newsite = {urlRequested, getCurrentSimTimeNano()};
-                    // instead of age tracker, use queue to keep track of LRU
-                    // need to make sure queue only stores unique values
-                    // check this when we delete something from the cache
                     websitesInCache[pageRequested] = newsite;
                 } else {
+                    // map traversal from https://www.geeksforgeeks.org/traversing-a-map-or-unordered_map-in-cpp-stl/
+                    // looping through to find the object that was inserted earliest
+                    
+                    // initalize time comparison to be the latest time in the simulation
                     long int oldestTime = 990000000000;
                     std::string lruSite = "";
                     std::map<std::string, cacheObject>::iterator it = websitesInCache.begin();
 
-
+                    // iterate through map, compare time stamps
                     while (it != websitesInCache.end()) {
-                        // Accessing the key
                         std::string word = it->first;
-                        // output.output(CALL_INFO, "iterating on %s \n",word.c_str());
-                        // Accessing the value
                         cacheObject cacheObject = it->second;
                         int cacheObjectTime = cacheObject.websiteAge;
                         if (cacheObjectTime < oldestTime) {

@@ -67,7 +67,7 @@ void websiteUser::setup() {
     output.output(CALL_INFO, "is now requesting %s \n", pageRequest.c_str());
 
     // request the url of this website from the cache
-    struct CacheRequest cachereq = { USER, userID, pageRequest, pageRequest, 0 };
+    struct CacheRequest cachereq = { USER, userID, pageRequest, "", 0 };
     websiteCache->send(new CacheRequestEvent(cachereq));
 }
 
@@ -86,7 +86,7 @@ bool websiteUser::clockTick( SST::Cycle_t currentCycle ) {
         currentWebsiteRequest = abs((int)(temp % 8));  
         std::string pageRequest = listOfPages.at(currentWebsiteRequest);
         output.output(CALL_INFO, "is now requesting %s \n", pageRequest.c_str());
-        struct CacheRequest cachereq = { USER, userID, pageRequest, pageRequest, 0 };
+        struct CacheRequest cachereq = { USER, userID, pageRequest, "", 0 };
         websiteCache->send(new CacheRequestEvent(cachereq));
         currentStatus = WAITING;
         startWaitingCycle = currentCycle;
@@ -101,7 +101,7 @@ bool websiteUser::waitingTick( SST::Cycle_t currentCycle ) {
         // essentially refreshing the page after it times out
         std::string pageRequest = listOfPages.at(currentWebsiteRequest);
         output.output(CALL_INFO, "is now re-requesting %s \n", pageRequest.c_str());
-        struct CacheRequest cachereq = { USER, userID, pageRequest, pageRequest, 0 };
+        struct CacheRequest cachereq = { USER, userID, pageRequest, "", 0 };
         websiteCache->send(new CacheRequestEvent(cachereq));
     }
     return false;
@@ -114,6 +114,8 @@ void websiteUser::handleEvent(SST::Event *ev) {
         std::string websiteUrl = userev->userreq.websiteUrl;
         bool validSite = userev->userreq.validSite;
         if (validSite) {
+            // recieved a valid website from the cache, can start browsing
+            currentWebsite = websiteUrl;
             currentStatus = BROWSING;
         } else {
             // did not get a response from cache
@@ -121,8 +123,4 @@ void websiteUser::handleEvent(SST::Event *ev) {
             currentStatus = WAITING;
         }
     } 
-}
-
-void websiteUser::outputTickInfo() {
-    output.verbose(CALL_INFO, 4, 0, "Sim-Time: %ld\n", getCurrentSimTimeNano());
 }

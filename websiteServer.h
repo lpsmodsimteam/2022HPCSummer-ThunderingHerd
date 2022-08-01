@@ -35,16 +35,8 @@ public:
 	~websiteServer();
 
 	/**
-	 * @brief This clock function checks the status of the philosopher, 
-	 * and updates their needs accordingly.  It also performs livelock 
-	 * detection
-	 * 
-	 * This function contains the main functionality of the entire simulation.  
-	 * It starts out by checking if we need to update our livelock window, which
-	 * checks the status of the system and notes down the current livelock 
-	 * metrics.  After this, we check the status of the philosopher, sending a 
-	 * request to the dining table for a chopstick if we're hungry, or seeing if 
-	 * we've elapsed out eating or thinking durations to switch states.
+	 * @brief This clock function checks the queue, and processes 
+	 * a defined amount of requests every cycle.
 	 * 
 	 * @param currentCycle This tells us what cycle of the simulation we're on
 	 * @return This returns whether or not the simulation should continue 
@@ -69,13 +61,13 @@ public:
 		"thunderingHerd", // element library
 		"websiteServer", // component
 		SST_ELI_ELEMENT_VERSION( 1, 0, 0 ),
-		"table to hold set of chopsticks",
+		"server to hold all possible urls of website, and communicate with cache",
 		COMPONENT_CATEGORY_UNCATEGORIZED
 	)
 
 	// Parameter name, description, default value
 	SST_ELI_DOCUMENT_PARAMS(
-		{ "randomseed", "Random Seed for car type generation", "151515" },
+		{ "randomseed", "Random Seed for errors within simulation", "151515" },
 	)
 
 	// Port name, description, event type
